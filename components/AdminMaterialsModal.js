@@ -41,67 +41,71 @@ export default function AdminMaterialsModal({ task, onClose, onAdd, onDelete }) 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{task.name} の関連資料</h3>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">📎 {task.name} の関連資料</div>
           <button className="modal-close" onClick={onClose} aria-label="閉じる">
-            ×
+            ✕
           </button>
         </div>
 
         {error && <div className="error-banner">{error}</div>}
 
         {materials.length === 0 ? (
-          <p className="modal-empty">このタスクにはまだ資料が登録されていません。</p>
+          <p className="hint">この項目にはまだ資料が添付されていません。</p>
         ) : (
-          <ul className="materials-list">
-            {materials.map((m, i) => (
-              <li key={i} className="materials-item admin-materials-item">
-                <span>
-                  {m.url ? (
-                    <a href={m.url} target="_blank" rel="noreferrer">
-                      📄 {m.name}
-                    </a>
-                  ) : (
-                    <span className="materials-item-noURL">📄 {m.name}（リンク未登録）</span>
-                  )}
-                </span>
-                <button className="btn-link admin-materials-delete" disabled={busy} onClick={() => handleDelete(i)}>
+          materials.map((m, i) => (
+            <div key={i} className="material-item">
+              <div className="material-icon">📄</div>
+              {m.url ? (
+                <a className="material-name" href={m.url} target="_blank" rel="noreferrer">
+                  {m.name}
+                </a>
+              ) : (
+                <span className="material-name no-url">{m.name}（リンク未登録）</span>
+              )}
+              <div className="material-actions">
+                {m.url && (
+                  <a className="btn btn-primary btn-sm" href={m.url} target="_blank" rel="noreferrer">
+                    開く ↗
+                  </a>
+                )}
+                <button className="btn btn-outline btn-sm" disabled={busy} onClick={() => handleDelete(i)}>
                   削除
                 </button>
-              </li>
-            ))}
-          </ul>
+              </div>
+            </div>
+          ))
         )}
 
-        <form className="admin-materials-form" onSubmit={handleAdd}>
-          <p className="admin-materials-count">
-            {materials.length} / {MAX_MATERIALS_PER_TASK} 件
-          </p>
-          {isFull ? (
-            <p className="viewer-note">上限（{MAX_MATERIALS_PER_TASK}件）に達しています。追加するには先に削除してください。</p>
-          ) : (
-            <>
-              <input
-                className="admin-text-input"
-                placeholder="資料名（例：手順書.pdf）"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={busy}
-              />
-              <input
-                className="admin-text-input"
-                placeholder="URL（任意）"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                disabled={busy}
-              />
-              <button className="btn btn-primary" type="submit" disabled={busy || !name.trim()}>
-                追加
-              </button>
-            </>
-          )}
-        </form>
+        {isFull ? (
+          <div className="material-limit-note" style={{ color: "var(--danger)", fontWeight: 700 }}>
+            上限の{MAX_MATERIALS_PER_TASK}件に達しているため、これ以上追加できません。追加するには既存の資料を削除してください。
+          </div>
+        ) : (
+          <form className="add-material-form" onSubmit={handleAdd}>
+            <input
+              placeholder="資料名（例：手順書.pdf）"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={busy}
+              maxLength={60}
+            />
+            <input
+              placeholder="資料URL（未入力なら「リンク未登録」表示）"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={busy}
+            />
+            <button className="btn btn-primary btn-sm" type="submit" disabled={busy || !name.trim()}>
+              ＋ 資料を追加
+            </button>
+            <div className="material-limit-note">
+              資料は1タスクにつき最大{MAX_MATERIALS_PER_TASK}件まで添付できます（現在{materials.length}/
+              {MAX_MATERIALS_PER_TASK}件）。
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
