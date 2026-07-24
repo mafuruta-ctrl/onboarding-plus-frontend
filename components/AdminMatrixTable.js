@@ -34,32 +34,32 @@ export default function AdminMatrixTable({ items, placements, isIncluded, onTogg
   }
 
   return (
-    <div className="admin-table-wrap">
+    <div style={{ overflowX: "auto" }}>
       {error && <div className="error-banner">{error}</div>}
-      <table className="admin-table">
+      <table className="matrix">
         <thead>
           <tr>
-            <th className="admin-table-item-col">項目</th>
+            <th>項目</th>
             {placements.map((p) => (
-              <th key={p.code} className="admin-table-check-col">
-                {p.name}
-              </th>
+              <th key={p.code}>{p.name}</th>
             ))}
-            {renderExtraColumn && <th className="admin-table-extra-col">資料</th>}
+            {renderExtraColumn && <th>資料</th>}
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
             <tr key={item.id}>
               <td>
-                <div className="admin-table-item-name">{item.name}</div>
-                {item.category && <div className="admin-table-item-sub">{item.category}</div>}
+                {item.name}
+                {item.category && (
+                  <div style={{ fontSize: "10.5px", color: "var(--muted)" }}>{item.category}</div>
+                )}
               </td>
               {placements.map((p) => {
                 const key = p.code + "|" + item.id;
                 const checked = isIncluded(p.code, item.id);
                 return (
-                  <td key={p.code} className="admin-table-check-col">
+                  <td key={p.code}>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -69,7 +69,7 @@ export default function AdminMatrixTable({ items, placements, isIncluded, onTogg
                   </td>
                 );
               })}
-              {renderExtraColumn && <td className="admin-table-extra-col">{renderExtraColumn(item)}</td>}
+              {renderExtraColumn && <td>{renderExtraColumn(item)}</td>}
             </tr>
           ))}
         </tbody>
