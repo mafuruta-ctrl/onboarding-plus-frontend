@@ -13,6 +13,9 @@ export default function Layout({ children }) {
         </Link>
         {isSignedIn && (
           <div className="header-user">
+            <Link href="/admin" className="btn-link header-admin-link">
+              管理者ページ
+            </Link>
             {profile?.picture && <img src={profile.picture} alt="" className="avatar" />}
             <span className="user-name">{profile?.name || profile?.email}</span>
             <button className="btn btn-ghost" onClick={signOut}>
