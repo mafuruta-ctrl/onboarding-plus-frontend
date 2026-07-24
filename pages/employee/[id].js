@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import Layout from "../../components/Layout";
 import SignInScreen from "../../components/SignInScreen";
-import ProgressBar from "../../components/ProgressBar";
+import ProgressRing from "../../components/ProgressRing";
 import SettingsTab from "../../components/SettingsTab";
 import TrainingTab from "../../components/TrainingTab";
 import ReportTab from "../../components/ReportTab";
@@ -11,9 +10,9 @@ import { useAuth } from "../../components/AuthProvider";
 import { gasApi } from "../../lib/gasClient";
 
 const TABS = [
-  { key: "settings", label: "各種設定" },
-  { key: "training", label: "研修" },
-  { key: "report", label: "日報" },
+  { key: "settings", icon: "⚙️", label: "各種設定" },
+  { key: "training", icon: "🎓", label: "研修" },
+  { key: "report", icon: "📝", label: "日報" },
 ];
 
 export default function EmployeeDetailPage() {
@@ -80,11 +79,18 @@ export default function EmployeeDetailPage() {
     }
   }
 
+  const taskPct = detail && detail.tasks.length
+    ? Math.round((detail.tasks.filter((t) => t.done).length / detail.tasks.length) * 100)
+    : 0;
+  const coursePct = detail && detail.courses.length
+    ? Math.round((detail.courses.filter((c) => c.completed).length / detail.courses.length) * 100)
+    : 0;
+
   return (
-    <Layout>
-      <Link href="/" className="back-link">
-        ← 一覧に戻る
-      </Link>
+    <Layout title={detail ? `${detail.name} さんのページ` : "個人ページ"} crumb="個人ページ">
+      <div className="back-link" onClick={() => router.push("/")}>
+        ← 一覧へ戻る
+      </div>
 
       {error && <div className="error-banner">エラーが発生しました：{error}</div>}
 
@@ -92,14 +98,18 @@ export default function EmployeeDetailPage() {
 
       {detail && (
         <>
-          <div className="employee-header">
-            <div>
-              <h1>{detail.name}</h1>
-              <p className="employee-header-meta">
-                {detail.placementName}　・　入社日：{detail.joinDate}
-              </p>
+          <div className="profile-header">
+            <div className="profile-header-left">
+              <div className="avatar-lg">{(detail.name || "?")[0]}</div>
+              <div>
+                <div className="profile-name">{detail.name}</div>
+                <div className="profile-meta">
+                  <span>🏢 {detail.placementName}</span>
+                  <span>📅 入社日：{detail.joinDate}</span>
+                </div>
+              </div>
             </div>
-            <ProgressBar value={detail.overallProgress} label="全体進捗" />
+            <ProgressRing value={detail.overallProgress} />
           </div>
 
           <nav className="tab-nav">
@@ -109,35 +119,33 @@ export default function EmployeeDetailPage() {
                 className={`tab-nav-item ${activeTab === tab.key ? "is-active" : ""}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                {tab.label}
+                {tab.icon} {tab.label}
+                {tab.key === "settings" && <span className="tab-count">{taskPct}%</span>}
+                {tab.key === "training" && <span className="tab-count">{coursePct}%</span>}
               </button>
             ))}
           </nav>
 
-          {activeTab === "settings" && (
-            <SettingsTab
-              tasks={detail.tasks}
-              canEdit={detail.canEdit}
-              onToggleTask={handleToggleTask}
-              busyTaskId={busyTaskId}
-            />
-          )}
-          {activeTab === "training" && (
-            <TrainingTab
-              courses={detail.courses}
-              canEdit={detail.canEdit}
-              onWatch={handleWatch}
-              onSubmitTest={handleSubmitTest}
-              busyCourseId={busyCourseId}
-            />
-          )}
-          {activeTab === "report" && <ReportTab report={detail.report} />}
-
-          {!detail.canEdit && (
-            <p className="viewer-note">
-              閲覧のみの権限です（チェックの変更はご本人または人事部のみ行えます）。
-            </p>
-          )}
+          <div className="tab-panel">
+            {activeTab === "settings" && (
+              <SettingsTab
+                tasks={detail.tasks}
+                canEdit={detail.canEdit}
+                onToggleTask={handleToggleTask}
+                busyTaskId={busyTaskId}
+              />
+            )}
+            {activeTab === "training" && (
+              <TrainingTab
+                courses={detail.courses}
+                canEdit={detail.canEdit}
+                onWatch={handleWatch}
+                onSubmitTest={handleSubmitTest}
+                busyCourseId={busyCourseId}
+              />
+            )}
+            {activeTab === "report" && <ReportTab report={detail.report} />}
+          </div>
         </>
       )}
     </Layout>
