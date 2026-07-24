@@ -1,6 +1,6 @@
 export default function ProgressBar({ value = 0, label }) {
   const pct = Math.max(0, Math.min(100, Number(value) || 0));
-  let barClass = "progress-bar-fill";
+  let barClass = "progress-fill";
   if (pct >= 100) barClass += " is-complete";
   else if (pct < 40) barClass += " is-behind";
 
