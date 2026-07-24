@@ -7,8 +7,8 @@ import { useAuth } from "../components/AuthProvider";
 import { gasApi } from "../lib/gasClient";
 
 const TABS = [
-  { key: "tasks", label: "配属別タスク設定", permKey: "canEditTaskMaster" },
-  { key: "courses", label: "配属別研修設定", permKey: "canEditCourseMaster" },
+  { key: "tasks", label: "配属別タスク設定", permKey: "canEditTaskMaster", tag: "人事部のみ" },
+  { key: "courses", label: "配属別研修設定", permKey: "canEditCourseMaster", tag: "研修担当 / 人事部" },
 ];
 
 function toSetKey(placementCode, itemId) {
@@ -61,7 +61,7 @@ export default function AdminPage() {
   if (error) {
     const isForbidden = /FORBIDDEN/.test(error);
     return (
-      <Layout>
+      <Layout title="管理者ページ">
         <div className="error-banner">
           {isForbidden
             ? "この画面は人事部・研修担当のみアクセスできます。権限が必要な場合は人事部にお問い合わせください。"
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
   if (!data) {
     return (
-      <Layout>
+      <Layout title="管理者ページ">
         <p className="loading-state">読み込み中…</p>
       </Layout>
     );
@@ -103,7 +103,7 @@ export default function AdminPage() {
   }
 
   return (
-    <Layout>
+    <Layout title="管理者ページ" crumb="配属別のタスク・研修コースの割り当てを管理します">
       <div className="page-header">
         <h1>管理者ページ</h1>
       </div>
@@ -128,40 +128,42 @@ export default function AdminPage() {
             ))}
           </nav>
 
-          <div className="tab-panel">
-            {activeTab === "tasks" && data.canEditTaskMaster && (
-              <>
-                <p className="viewer-note admin-tab-intro">
-                  チェックを入れると、その配属に配属された新入社員全員に該当タスクが表示されます。「資料」列から資料の追加・削除もできます（最大10件／タスク）。
-                </p>
-                <AdminMatrixTable
-                  items={data.tasks.map((t) => ({ id: t.taskId, name: t.name, category: t.category }))}
-                  placements={data.placements.map((p) => ({ code: p.code, name: p.name }))}
-                  isIncluded={(code, id) => taskSetKeys.has(toSetKey(code, id))}
-                  onToggle={handleToggleTask}
-                  renderExtraColumn={(item) => (
-                    <button className="btn-link" onClick={() => setMaterialsTaskId(item.id)}>
-                      管理（{(data.tasks.find((t) => t.taskId === item.id)?.materials || []).length}件）
-                    </button>
-                  )}
-                />
-              </>
-            )}
+          {activeTab === "tasks" && data.canEditTaskMaster && (
+            <div className="admin-panel">
+              <div className="admin-title">
+                🛠️ 配属別タスクセット・マスタ管理 <span className="admin-tag">人事部のみ</span>
+              </div>
+              <AdminMatrixTable
+                items={data.tasks.map((t) => ({ id: t.taskId, name: t.name, category: t.category }))}
+                placements={data.placements.map((p) => ({ code: p.code, name: p.name }))}
+                isIncluded={(code, id) => taskSetKeys.has(toSetKey(code, id))}
+                onToggle={handleToggleTask}
+                renderExtraColumn={(item) => (
+                  <button className="btn-link" onClick={() => setMaterialsTaskId(item.id)}>
+                    管理（{(data.tasks.find((t) => t.taskId === item.id)?.materials || []).length}件）
+                  </button>
+                )}
+              />
+              <div className="hint">
+                チェックのON/OFFで、配属先ごとに割り当てるタスクをカスタマイズできます。「資料」列から資料の追加・削除もできます（最大10件／タスク）。
+              </div>
+            </div>
+          )}
 
-            {activeTab === "courses" && data.canEditCourseMaster && (
-              <>
-                <p className="viewer-note admin-tab-intro">
-                  チェックを入れると、その配属に配属された新入社員全員に該当研修コースが表示されます。
-                </p>
-                <AdminMatrixTable
-                  items={data.courses.map((c) => ({ id: c.courseId, name: c.name, category: c.category }))}
-                  placements={data.placements.map((p) => ({ code: p.code, name: p.name }))}
-                  isIncluded={(code, id) => courseSetKeys.has(toSetKey(code, id))}
-                  onToggle={handleToggleCourse}
-                />
-              </>
-            )}
-          </div>
+          {activeTab === "courses" && data.canEditCourseMaster && (
+            <div className="admin-panel">
+              <div className="admin-title">
+                🛠️ 配属別研修セット・マスタ管理 <span className="admin-tag">研修担当 / 人事部</span>
+              </div>
+              <AdminMatrixTable
+                items={data.courses.map((c) => ({ id: c.courseId, name: c.name, category: c.category }))}
+                placements={data.placements.map((p) => ({ code: p.code, name: p.name }))}
+                isIncluded={(code, id) => courseSetKeys.has(toSetKey(code, id))}
+                onToggle={handleToggleCourse}
+              />
+              <div className="hint">配属ごとにチェックのON/OFFで受講コースを切り替えられます。</div>
+            </div>
+          )}
         </>
       )}
 
