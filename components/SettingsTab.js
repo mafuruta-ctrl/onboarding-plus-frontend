@@ -12,43 +12,56 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
     return <p className="empty-state">この配属に割り当てられた設定タスクはありません。</p>;
   }
 
-  const grouped = tasks.reduce((acc, t) => {
-    const key = t.category || "その他";
-    (acc[key] = acc[key] || []).push(t);
-    return acc;
-  }, {});
+  const categories = [...new Set(tasks.map((t) => t.category || "その他"))];
 
   return (
-    <div className="tab-panel">
-      {Object.entries(grouped).map(([category, categoryTasks]) => (
-        <div key={category} className="task-category">
-          <h3 className="task-category-title">{category}</h3>
-          <ul className="task-list">
-            {categoryTasks.map((task) => (
-              <li key={task.taskId} className={`task-row ${task.done ? "is-done" : ""}`}>
-                <label className="task-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={task.done}
-                    disabled={!canEdit || busyTaskId === task.taskId}
-                    onChange={(e) => onToggleTask(task.taskId, e.target.checked)}
-                  />
-                  <span className="task-name">{task.name}</span>
-                </label>
-                {task.dept && <span className="task-dept">{task.dept}</span>}
-                {task.materials && task.materials.length > 0 && (
-                  <button
-                    className="btn btn-link"
-                    onClick={() => setMaterialsFor(task)}
-                  >
-                    資料を見る（{task.materials.length}）
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+    <>
+      {categories.map((category) => {
+        const categoryTasks = tasks.filter((t) => (t.category || "その他") === category);
+        const doneN = categoryTasks.filter((t) => t.done).length;
+        return (
+          <div key={category}>
+            <div className="section-title">
+              {category}
+              <span className="cat-progress">
+                {doneN}/{categoryTasks.length} 完了
+              </span>
+            </div>
+            <ul className="task-list">
+              {categoryTasks.map((task) => {
+                const busy = !canEdit || busyTaskId === task.taskId;
+                return (
+                  <li key={task.taskId} className={`task-row ${task.done ? "is-done" : ""}`}>
+                    <button
+                      type="button"
+                      className={`chk ${task.done ? "is-checked" : ""}`}
+                      disabled={busy}
+                      onClick={() => onToggleTask(task.taskId, !task.done)}
+                      aria-label={task.done ? "未完了に戻す" : "完了にする"}
+                    >
+                      {task.done ? "✓" : ""}
+                    </button>
+                    <div style={{ flex: 1 }}>
+                      <div className="task-name">{task.name}</div>
+                      {task.dept && <div className="task-meta">担当部門：{task.dept}</div>}
+                    </div>
+                    {task.materials && task.materials.length > 0 && (
+                      <button className="btn btn-outline btn-sm" onClick={() => setMaterialsFor(task)}>
+                        📄 資料を見る（{task.materials.length}）
+                      </button>
+                    )}
+                    <div className="task-right">{task.done ? "完了" : "未完了"}</div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+
+      {!canEdit && (
+        <p className="viewer-note">閲覧のみの権限です（チェックの変更はご本人または人事部のみ行えます）。</p>
+      )}
 
       {materialsFor && (
         <MaterialsModal
@@ -57,6 +70,6 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
           onClose={() => setMaterialsFor(null)}
         />
       )}
-    </div>
+    </>
   );
 }
