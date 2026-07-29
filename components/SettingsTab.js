@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Check, FileText } from "lucide-react";
 import MaterialsModal from "./MaterialsModal";
 
 /**
@@ -39,7 +40,7 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
                       onClick={() => onToggleTask(task.taskId, !task.done)}
                       aria-label={task.done ? "未完了に戻す" : "完了にする"}
                     >
-                      {task.done ? "✓" : ""}
+                      {task.done && <Check size={13} strokeWidth={3} />}
                     </button>
                     <div style={{ flex: 1 }}>
                       <div className="task-name">{task.name}</div>
@@ -48,7 +49,7 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
                     </div>
                     {task.materials && task.materials.length > 0 && (
                       <button className="btn btn-outline btn-sm" onClick={() => setMaterialsFor(task)}>
-                        📄 資料を見る（{task.materials.length}）
+                        <FileText size={13} /> 資料を見る（{task.materials.length}）
                       </button>
                     )}
                     <div className="task-right">{task.done ? "完了" : "未完了"}</div>
