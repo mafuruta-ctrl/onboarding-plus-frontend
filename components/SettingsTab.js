@@ -44,6 +44,7 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
                     <div style={{ flex: 1 }}>
                       <div className="task-name">{task.name}</div>
                       {task.dept && <div className="task-meta">担当部門：{task.dept}</div>}
+                      {task.deadline && <div className="task-meta">対応目安：{task.deadline}</div>}
                     </div>
                     {task.materials && task.materials.length > 0 && (
                       <button className="btn btn-outline btn-sm" onClick={() => setMaterialsFor(task)}>
