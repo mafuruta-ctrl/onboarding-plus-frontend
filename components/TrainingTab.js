@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Check, ClipboardCheck, Copy, ExternalLink, FileText } from "lucide-react";
+import { BookOpen, Calendar, Check, ClipboardCheck, Copy, ExternalLink, FileText } from "lucide-react";
 import MaterialsModal from "./MaterialsModal";
 
 /**
@@ -10,6 +10,13 @@ import MaterialsModal from "./MaterialsModal";
  */
 function isWebUrl(value) {
   return /^https?:\/\//i.test(value || "");
+}
+
+// 対応期日に「カレンダー」という文言が含まれる場合は、各自のGoogleカレンダートップへ
+// 遷移できるリンクとして表示する（実際の研修日はカレンダー上でしか分からないため）。
+const GOOGLE_CALENDAR_URL = "https://calendar.google.com/calendar/u/0/r";
+function isCalendarDeadline(value) {
+  return (value || "").includes("カレンダー");
 }
 
 function CourseLinkOrPath({ url }) {
@@ -89,7 +96,19 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                           {course.method}
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
-                        {course.deadline && <div className="course-meta">対応期日：{course.deadline}</div>}
+                        {course.deadline && isCalendarDeadline(course.deadline) && (
+                          
+                            className="course-meta course-meta-link"
+                            href={GOOGLE_CALENDAR_URL}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <Calendar size={11} /> 対応期日：{course.deadline}
+                          </a>
+                        )}
+                        {course.deadline && !isCalendarDeadline(course.deadline) && (
+                          <div className="course-meta">対応期日：{course.deadline}</div>
+                        )}
                       </div>
                       {course.completed ? (
                         <span className="pill pill-passed">
