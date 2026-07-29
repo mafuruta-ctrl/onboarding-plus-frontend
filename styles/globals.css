@@ -750,6 +750,12 @@ tr.row-clickable:hover {
   margin-top: 2px;
 }
 
+.course-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 .course-pills {
   display: flex;
   gap: 6px;
