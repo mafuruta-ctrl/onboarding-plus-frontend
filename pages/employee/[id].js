@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { ArrowLeft, Building2, Calendar, GraduationCap, NotebookText, Settings } from "lucide-react";
 import Layout from "../../components/Layout";
 import SignInScreen from "../../components/SignInScreen";
 import ProgressRing from "../../components/ProgressRing";
@@ -9,10 +10,11 @@ import ReportTab from "../../components/ReportTab";
 import { useAuth } from "../../components/AuthProvider";
 import { gasApi } from "../../lib/gasClient";
 
-const TABS = [
-  { key: "settings", icon: "⚙️", label: "各種設定" },
-  { key: "training", icon: "🎓", label: "研修" },
-  { key: "report", icon: "📝", label: "日報" },
+// 日報タブは日報アプリ連携の対象である sales_member（営業・MGR未満）配属のみ表示する。
+const ALL_TABS = [
+  { key: "settings", icon: Settings, label: "各種設定" },
+  { key: "training", icon: GraduationCap, label: "研修" },
+  { key: "report", icon: NotebookText, label: "日報", placementOnly: "sales_member" },
 ];
 
 export default function EmployeeDetailPage() {
@@ -89,7 +91,7 @@ export default function EmployeeDetailPage() {
   return (
     <Layout title={detail ? `${detail.name} さんのページ` : "個人ページ"} crumb="個人ページ">
       <div className="back-link" onClick={() => router.push("/")}>
-        ← 一覧へ戻る
+        <ArrowLeft size={15} /> 一覧へ戻る
       </div>
 
       {error && <div className="error-banner">エラーが発生しました：{error}</div>}
@@ -104,48 +106,68 @@ export default function EmployeeDetailPage() {
               <div>
                 <div className="profile-name">{detail.name}</div>
                 <div className="profile-meta">
-                  <span>🏢 {detail.placementName}</span>
-                  <span>📅 入社日：{detail.joinDate}</span>
+                  <span>
+                    <Building2 size={13} /> {detail.placementName}
+                  </span>
+                  <span>
+                    <Calendar size={13} /> 入社日：{detail.joinDate}
+                  </span>
                 </div>
               </div>
             </div>
             <ProgressRing value={detail.overallProgress} />
           </div>
 
-          <nav className="tab-nav">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                className={`tab-nav-item ${activeTab === tab.key ? "is-active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.icon} {tab.label}
-                {tab.key === "settings" && <span className="tab-count">{taskPct}%</span>}
-                {tab.key === "training" && <span className="tab-count">{coursePct}%</span>}
-              </button>
-            ))}
-          </nav>
+          {(() => {
+            const visibleTabs = ALL_TABS.filter(
+              (tab) => !tab.placementOnly || detail.placementCode === tab.placementOnly
+            );
+            const effectiveTab = visibleTabs.some((t) => t.key === activeTab)
+              ? activeTab
+              : visibleTabs[0]?.key;
 
-          <div className="tab-panel">
-            {activeTab === "settings" && (
-              <SettingsTab
-                tasks={detail.tasks}
-                canEdit={detail.canEdit}
-                onToggleTask={handleToggleTask}
-                busyTaskId={busyTaskId}
-              />
-            )}
-            {activeTab === "training" && (
-              <TrainingTab
-                courses={detail.courses}
-                canEdit={detail.canEdit}
-                onWatch={handleWatch}
-                onSubmitTest={handleSubmitTest}
-                busyCourseId={busyCourseId}
-              />
-            )}
-            {activeTab === "report" && <ReportTab report={detail.report} />}
-          </div>
+            return (
+              <>
+                <nav className="tab-nav">
+                  {visibleTabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.key}
+                        className={`tab-nav-item ${effectiveTab === tab.key ? "is-active" : ""}`}
+                        onClick={() => setActiveTab(tab.key)}
+                      >
+                        <Icon size={15} /> {tab.label}
+                        {tab.key === "settings" && <span className="tab-count">{taskPct}%</span>}
+                        {tab.key === "training" && <span className="tab-count">{coursePct}%</span>}
+                      </button>
+                    );
+                  })}
+                </nav>
+
+                <div className="tab-panel">
+                  {effectiveTab === "settings" && (
+                    <SettingsTab
+                      tasks={detail.tasks}
+                      canEdit={detail.canEdit}
+                      onToggleTask={handleToggleTask}
+                      busyTaskId={busyTaskId}
+                    />
+                  )}
+                  {effectiveTab === "training" && (
+                    <TrainingTab
+                      courses={detail.courses}
+                      canEdit={detail.canEdit}
+                      onWatch={handleWatch}
+                      onSubmitTest={handleSubmitTest}
+                      busyCourseId={busyCourseId}
+                    />
+                  )}
+                  {effectiveTab === "report" && <ReportTab report={detail.report} />}
+                </div>
+              </>
+            );
+          })()}
         </>
       )}
     </Layout>
