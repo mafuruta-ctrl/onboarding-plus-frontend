@@ -1,11 +1,15 @@
+import { ExternalLink, FileText, Paperclip, X } from "lucide-react";
+
 export default function MaterialsModal({ taskName, materials, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <div className="modal-title">📎 {taskName} の関連資料</div>
+          <div className="modal-title">
+            <Paperclip size={16} /> {taskName} の関連資料
+          </div>
           <button className="modal-close" onClick={onClose} aria-label="閉じる">
-            ✕
+            <X size={16} />
           </button>
         </div>
         {materials.length === 0 ? (
@@ -13,7 +17,9 @@ export default function MaterialsModal({ taskName, materials, onClose }) {
         ) : (
           materials.map((m, i) => (
             <div key={i} className="material-item">
-              <div className="material-icon">📄</div>
+              <div className="material-icon">
+                <FileText size={16} />
+              </div>
               {m.url ? (
                 <a className="material-name" href={m.url} target="_blank" rel="noreferrer">
                   {m.name}
@@ -24,7 +30,7 @@ export default function MaterialsModal({ taskName, materials, onClose }) {
               {m.url && (
                 <div className="material-actions">
                   <a className="btn btn-primary btn-sm" href={m.url} target="_blank" rel="noreferrer">
-                    開く ↗
+                    <ExternalLink size={12} /> 開く
                   </a>
                 </div>
               )}
