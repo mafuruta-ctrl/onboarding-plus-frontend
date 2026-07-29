@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Wrench } from "lucide-react";
 import Layout from "../components/Layout";
 import SignInScreen from "../components/SignInScreen";
 import AdminMatrixTable from "../components/AdminMatrixTable";
@@ -144,7 +145,7 @@ export default function AdminPage() {
           {activeTab === "tasks" && data.canEditTaskMaster && (
             <div className="admin-panel">
               <div className="admin-title">
-                🛠️ 配属別タスクセット・マスタ管理 <span className="admin-tag">人事部のみ</span>
+                <Wrench size={14} /> 配属別タスクセット・マスタ管理 <span className="admin-tag">人事部のみ</span>
               </div>
               <AdminMatrixTable
                 items={data.tasks.map((t) => ({ id: t.taskId, name: t.name, category: t.category }))}
@@ -166,7 +167,7 @@ export default function AdminPage() {
           {activeTab === "courses" && data.canEditCourseMaster && (
             <div className="admin-panel">
               <div className="admin-title">
-                🛠️ 配属別研修セット・マスタ管理 <span className="admin-tag">研修担当 / 人事部</span>
+                <Wrench size={14} /> 配属別研修セット・マスタ管理 <span className="admin-tag">研修担当 / 人事部</span>
               </div>
               <AdminMatrixTable
                 items={data.courses.map((c) => ({ id: c.courseId, name: c.name, category: c.category }))}
