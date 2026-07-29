@@ -97,6 +97,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
                         {course.deadline && isCalendarDeadline(course.deadline) && (
+                          <a
                           
                             className="course-meta course-meta-link"
                             href={GOOGLE_CALENDAR_URL}
