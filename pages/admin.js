@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import SignInScreen from "../components/SignInScreen";
 import AdminMatrixTable from "../components/AdminMatrixTable";
 import AdminMaterialsModal from "../components/AdminMaterialsModal";
+import AdminCourseMaterialsModal from "../components/AdminCourseMaterialsModal";
 import { useAuth } from "../components/AuthProvider";
 import { gasApi } from "../lib/gasClient";
 
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
   const [materialsTaskId, setMaterialsTaskId] = useState(null);
+  const [materialsCourseId, setMaterialsCourseId] = useState(null);
 
   const load = useCallback(() => {
     if (!isSignedIn) return;
@@ -81,6 +83,7 @@ export default function AdminPage() {
 
   const visibleTabs = TABS.filter((t) => data[t.permKey]);
   const materialsTask = materialsTaskId ? data.tasks.find((t) => t.taskId === materialsTaskId) : null;
+  const materialsCourse = materialsCourseId ? data.courses.find((c) => c.courseId === materialsCourseId) : null;
 
   async function handleToggleTask(placementCode, taskId, included) {
     await gasApi.updatePlacementTaskSet(idToken, placementCode, taskId, included);
@@ -99,6 +102,16 @@ export default function AdminPage() {
 
   async function handleDeleteMaterial(taskId, index) {
     await gasApi.deleteMaterial(idToken, taskId, index);
+    await load();
+  }
+
+  async function handleAddCourseMaterial(courseId, name, url) {
+    await gasApi.addCourseMaterial(idToken, courseId, name, url);
+    await load();
+  }
+
+  async function handleDeleteCourseMaterial(courseId, index) {
+    await gasApi.deleteCourseMaterial(idToken, courseId, index);
     await load();
   }
 
@@ -160,8 +173,15 @@ export default function AdminPage() {
                 placements={data.placements.map((p) => ({ code: p.code, name: p.name }))}
                 isIncluded={(code, id) => courseSetKeys.has(toSetKey(code, id))}
                 onToggle={handleToggleCourse}
+                renderExtraColumn={(item) => (
+                  <button className="btn-link" onClick={() => setMaterialsCourseId(item.id)}>
+                    管理（{(data.courses.find((c) => c.courseId === item.id)?.materials || []).length}件）
+                  </button>
+                )}
               />
-              <div className="hint">配属ごとにチェックのON/OFFで受講コースを切り替えられます。</div>
+              <div className="hint">
+                チェックのON/OFFで、配属先ごとに受講コースを切り替えられます。「資料」列から資料の追加・削除もできます（最大10件／コース）。
+              </div>
             </div>
           )}
         </>
@@ -173,6 +193,15 @@ export default function AdminPage() {
           onClose={() => setMaterialsTaskId(null)}
           onAdd={handleAddMaterial}
           onDelete={handleDeleteMaterial}
+        />
+      )}
+
+      {materialsCourse && (
+        <AdminCourseMaterialsModal
+          course={materialsCourse}
+          onClose={() => setMaterialsCourseId(null)}
+          onAdd={handleAddCourseMaterial}
+          onDelete={handleDeleteCourseMaterial}
         />
       )}
     </Layout>
