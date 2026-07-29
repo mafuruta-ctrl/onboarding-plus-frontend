@@ -771,6 +771,19 @@ tr.row-clickable:hover {
   margin-top: 4px;
 }
 
+.course-meta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.course-meta-link:hover {
+  text-decoration: underline;
+}
+
 .course-pills {
   display: flex;
   gap: 6px;
