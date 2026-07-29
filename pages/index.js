@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { Search } from "lucide-react";
 import Layout from "../components/Layout";
 import SignInScreen from "../components/SignInScreen";
 import ProgressBar from "../components/ProgressBar";
@@ -66,12 +67,14 @@ export default function TopPage() {
     <Layout title="ダッシュボード" crumb="アクセス権のある新入社員一覧">
       <div className="page-header">
         <h1>新入社員一覧</h1>
-        <input
-          className="search-input"
-          placeholder="🔎 氏名・配属で検索"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="search-input">
+          <Search size={15} />
+          <input
+            placeholder="氏名・配属で検索"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {error && (
