@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExternalLink, FileText, Paperclip, Plus, X } from "lucide-react";
 
 const MAX_MATERIALS_PER_TASK = 10;
 
@@ -43,9 +44,11 @@ export default function AdminMaterialsModal({ task, onClose, onAdd, onDelete }) 
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <div className="modal-title">📎 {task.name} の関連資料</div>
+          <div className="modal-title">
+            <Paperclip size={16} /> {task.name} の関連資料
+          </div>
           <button className="modal-close" onClick={onClose} aria-label="閉じる">
-            ✕
+            <X size={16} />
           </button>
         </div>
 
@@ -56,7 +59,9 @@ export default function AdminMaterialsModal({ task, onClose, onAdd, onDelete }) 
         ) : (
           materials.map((m, i) => (
             <div key={i} className="material-item">
-              <div className="material-icon">📄</div>
+              <div className="material-icon">
+                <FileText size={16} />
+              </div>
               {m.url ? (
                 <a className="material-name" href={m.url} target="_blank" rel="noreferrer">
                   {m.name}
@@ -67,7 +72,7 @@ export default function AdminMaterialsModal({ task, onClose, onAdd, onDelete }) 
               <div className="material-actions">
                 {m.url && (
                   <a className="btn btn-primary btn-sm" href={m.url} target="_blank" rel="noreferrer">
-                    開く ↗
+                    <ExternalLink size={12} /> 開く
                   </a>
                 )}
                 <button className="btn btn-outline btn-sm" disabled={busy} onClick={() => handleDelete(i)}>
@@ -98,7 +103,7 @@ export default function AdminMaterialsModal({ task, onClose, onAdd, onDelete }) 
               disabled={busy}
             />
             <button className="btn btn-primary btn-sm" type="submit" disabled={busy || !name.trim()}>
-              ＋ 資料を追加
+              <Plus size={13} /> 資料を追加
             </button>
             <div className="material-limit-note">
               資料は1タスクにつき最大{MAX_MATERIALS_PER_TASK}件まで添付できます（現在{materials.length}/
