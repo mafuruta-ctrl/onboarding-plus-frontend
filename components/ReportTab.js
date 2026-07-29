@@ -1,3 +1,5 @@
+import { ExternalLink, NotebookText } from "lucide-react";
+
 export default function ReportTab({ report }) {
   const reportUrl = process.env.NEXT_PUBLIC_DAILY_REPORT_URL || "#";
   const rate = report && report.required
@@ -9,7 +11,9 @@ export default function ReportTab({ report }) {
       <div className="report-box">
         <div>
           <div className="report-left">
-            <div className="report-icon">📝</div>
+            <div className="report-icon">
+              <NotebookText size={22} />
+            </div>
             <div>
               <div className="report-title">日報（外部アプリ連携）</div>
               <div className="report-desc">
@@ -42,7 +46,7 @@ export default function ReportTab({ report }) {
           )}
         </div>
         <a className="btn btn-primary" href={reportUrl} target="_blank" rel="noreferrer">
-          日報アプリを開く ↗
+          <ExternalLink size={14} /> 日報アプリを開く
         </a>
       </div>
       <p className="report-note">※ 日報タブの提出率は全体進捗率の算出には含めていません（参考表示）。</p>
