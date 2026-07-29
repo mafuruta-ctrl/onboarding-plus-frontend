@@ -178,15 +178,24 @@ a {
 .search-input {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 7px 12px;
   font-size: 13px;
-  color: var(--text);
+  color: var(--muted);
   width: 230px;
+}
+
+.search-input input {
+  border: none;
   outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
 }
 
 .content {
@@ -525,6 +534,12 @@ tr.row-clickable:hover {
   flex-wrap: wrap;
 }
 
+.profile-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .ring-wrap {
   display: flex;
   align-items: center;
@@ -774,7 +789,9 @@ tr.row-clickable:hover {
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 99px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 
 .pill-watched {
@@ -1016,17 +1033,22 @@ tr.row-clickable:hover {
 .modal-title {
   font-size: 15px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .modal-close {
   cursor: pointer;
-  font-size: 18px;
   color: var(--muted);
   line-height: 1;
-  padding: 2px 6px;
+  padding: 6px;
   border-radius: 6px;
   background: none;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-close:hover {
