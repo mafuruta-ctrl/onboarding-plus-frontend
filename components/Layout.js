@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { LayoutDashboard, Settings2 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 export default function Layout({ children, title, crumb }) {
@@ -18,10 +19,16 @@ export default function Layout({ children, title, crumb }) {
         </div>
 
         <Link href="/" className={`nav-item ${router.pathname === "/" ? "is-active" : ""}`}>
-          <span className="nav-icon">📊</span>ダッシュボード
+          <span className="nav-icon">
+            <LayoutDashboard size={16} />
+          </span>
+          ダッシュボード
         </Link>
         <Link href="/admin" className={`nav-item ${router.pathname === "/admin" ? "is-active" : ""}`}>
-          <span className="nav-icon">🛠️</span>管理者ページ
+          <span className="nav-icon">
+            <Settings2 size={16} />
+          </span>
+          管理者ページ
         </Link>
 
         <div className="user-card">
