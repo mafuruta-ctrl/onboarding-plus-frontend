@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BookOpen, Check, ClipboardCheck, Copy, ExternalLink, FileText } from "lucide-react";
 import MaterialsModal from "./MaterialsModal";
 
 /**
@@ -19,7 +20,7 @@ function CourseLinkOrPath({ url }) {
   if (isWebUrl(url)) {
     return (
       <a className="btn btn-outline btn-sm" href={url} target="_blank" rel="noreferrer">
-        ▶ リンク先へ飛ぶ ↗
+        <ExternalLink size={13} /> リンク先へ飛ぶ
       </a>
     );
   }
@@ -38,7 +39,15 @@ function CourseLinkOrPath({ url }) {
     <div className="path-copy-box">
       <span className="path-copy-text">{url}</span>
       <button type="button" className="btn btn-outline btn-sm" onClick={handleCopy}>
-        {copied ? "コピーしました" : "📋 パスをコピー"}
+        {copied ? (
+          <>
+            <Check size={13} /> コピーしました
+          </>
+        ) : (
+          <>
+            <Copy size={13} /> パスをコピー
+          </>
+        )}
       </button>
     </div>
   );
@@ -83,7 +92,9 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                         {course.deadline && <div className="course-meta">対応期日：{course.deadline}</div>}
                       </div>
                       {course.completed ? (
-                        <span className="pill pill-passed">完了 ✓</span>
+                        <span className="pill pill-passed">
+                          <Check size={11} strokeWidth={3} /> 完了
+                        </span>
                       ) : (
                         <span className="pill pill-pending">未完了</span>
                       )}
@@ -110,12 +121,12 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                     <div className="course-actions">
                       {course.materials && course.materials.length > 0 && (
                         <button className="btn btn-outline btn-sm" onClick={() => setMaterialsFor(course)}>
-                          📄 資料を見る（{course.materials.length}）
+                          <FileText size={13} /> 資料を見る（{course.materials.length}）
                         </button>
                       )}
                       {course.glossaryUrl && (
                         <a className="btn btn-outline btn-sm" href={course.glossaryUrl} target="_blank" rel="noreferrer">
-                          📖 用語集
+                          <BookOpen size={13} /> 用語集
                         </a>
                       )}
 
@@ -133,7 +144,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                         <div className="test-submit">
                           {course.testUrl && (
                             <a className="btn btn-outline btn-sm" href={course.testUrl} target="_blank" rel="noreferrer">
-                              📝 テストを受ける ↗
+                              <ClipboardCheck size={13} /> テストを受ける
                             </a>
                           )}
                           <button
