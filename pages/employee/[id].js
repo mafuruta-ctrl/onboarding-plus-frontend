@@ -135,8 +135,12 @@ export default function EmployeeDetailPage() {
     }
   }
 
-  const taskPct = detail && detail.tasks.length
-    ? Math.round((detail.tasks.filter((t) => t.done).length / detail.tasks.length) * 100)
+  // カテゴリ名に「任意」を含むタスク（備品（任意）・システム・ツール（任意）など）は
+  // 必須設定ではないため、このバッジの%計算からは除外する（GAS側のcomputeProgress_と
+  // 同じルール）。タスク自体は各種設定タブに引き続き表示・チェック可能。
+  const countableTasks = detail ? detail.tasks.filter((t) => !(t.category || "").includes("任意")) : [];
+  const taskPct = countableTasks.length
+    ? Math.round((countableTasks.filter((t) => t.done).length / countableTasks.length) * 100)
     : 0;
   const coursePct = detail && detail.courses.length
     ? Math.round((detail.courses.filter((c) => c.completed).length / detail.courses.length) * 100)
