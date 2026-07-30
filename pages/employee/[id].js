@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { ArrowLeft, Building2, Calendar, GraduationCap, NotebookText, Settings } from "lucide-react";
 import Layout from "../../components/Layout";
@@ -43,16 +43,30 @@ export default function EmployeeDetailPage() {
     setDetail(detailCache[id] || null);
   }, [id]);
 
+  // チェック・完了ボタンの反応を速くするため、各操作の書き込みが終わった時点で
+  // すぐボタンを再度押せるようにし、その後の再読み込みはバックグラウンドで行う
+  // （下記ハンドラ参照）。ただし複数の操作を連続で押した場合、再読み込みの応答が
+  // 届く順番が前後することがあり、古い再読み込み結果が新しい操作結果を上書きして
+  // 一瞬前の状態に戻って見えてしまう可能性がある。これを防ぐため、再読み込みには
+  // 世代番号を振り、「自分より新しい再読み込みが既に走っていたら自分の結果は捨てる」
+  // というガードを入れている。
+  const reloadIdRef = useRef(0);
+
   const loadDetail = useCallback(() => {
     if (!isSignedIn || !id) return;
     setError(null);
+    const myReloadId = ++reloadIdRef.current;
     return gasApi
       .getEmployeeDetail(idToken, id)
       .then((data) => {
+        if (reloadIdRef.current !== myReloadId) return; // より新しい再読み込みが走っていたら破棄
         setDetail(data);
         detailCache[id] = data;
       })
-      .catch((err) => setError(err.message || String(err)));
+      .catch((err) => {
+        if (reloadIdRef.current !== myReloadId) return;
+        setError(err.message || String(err));
+      });
   }, [isSignedIn, idToken, id]);
 
   useEffect(() => {
@@ -64,8 +78,10 @@ export default function EmployeeDetailPage() {
   }
 
   // 楽観的UI更新：GASからの応答（1〜数秒かかる）を待たずに、クリックした瞬間に
-  // 画面上の状態を先に切り替える。裏で実際の更新・再読み込みを行い、失敗した場合だけ
-  // 本来のサーバー状態に戻す。ボタンを押してから反映されるまでのタイムラグを解消するため。
+  // 画面上の状態を先に切り替える。実際の書き込みが終わった時点ですぐボタンを再度
+  // 押せるようにし（チェックを外す・取り消すまでの待ち時間を短くするため）、サーバーとの
+  // 整合を取るための再読み込みはバックグラウンドで行う。失敗した場合は再読み込みの
+  // 結果で本来のサーバー状態に戻る。
   async function handleToggleTask(taskId, done) {
     setBusyTaskId(taskId);
     setError(null);
@@ -79,12 +95,11 @@ export default function EmployeeDetailPage() {
     });
     try {
       await gasApi.updateTaskStatus(idToken, id, taskId, done);
-      await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
-      await loadDetail(); // 失敗時は実際のサーバー状態に戻す
     } finally {
       setBusyTaskId(null);
+      loadDetail(); // 失敗時はこの再読み込みで実際のサーバー状態に戻る
     }
   }
 
@@ -101,12 +116,32 @@ export default function EmployeeDetailPage() {
     });
     try {
       await gasApi.updateTrainingProgress(idToken, id, courseId, "watch");
-      await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
-      await loadDetail();
     } finally {
       setBusyCourseId(null);
+      loadDetail();
+    }
+  }
+
+  // 誤って「完了」を押してしまった場合の取り消し。
+  async function handleUnwatch(courseId) {
+    setBusyCourseId(courseId);
+    setError(null);
+    setDetail((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        courses: prev.courses.map((c) => (c.courseId === courseId ? { ...c, watchedAt: null, completed: false } : c)),
+      };
+    });
+    try {
+      await gasApi.updateTrainingProgress(idToken, id, courseId, "unwatch");
+    } catch (err) {
+      setError(err.message || String(err));
+    } finally {
+      setBusyCourseId(null);
+      loadDetail();
     }
   }
 
@@ -126,12 +161,32 @@ export default function EmployeeDetailPage() {
     });
     try {
       await gasApi.updateTrainingProgress(idToken, id, courseId, "test", score);
-      await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
-      await loadDetail();
     } finally {
       setBusyCourseId(null);
+      loadDetail();
+    }
+  }
+
+  // 誤って「テスト完了」を押してしまった場合の取り消し。
+  async function handleUntest(courseId) {
+    setBusyCourseId(courseId);
+    setError(null);
+    setDetail((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        courses: prev.courses.map((c) => (c.courseId === courseId ? { ...c, testScore: null, testPassed: null, completed: false } : c)),
+      };
+    });
+    try {
+      await gasApi.updateTrainingProgress(idToken, id, courseId, "untest");
+    } catch (err) {
+      setError(err.message || String(err));
+    } finally {
+      setBusyCourseId(null);
+      loadDetail();
     }
   }
 
@@ -217,7 +272,9 @@ export default function EmployeeDetailPage() {
                       courses={detail.courses}
                       canEdit={detail.canEdit}
                       onWatch={handleWatch}
+                      onUnwatch={handleUnwatch}
                       onSubmitTest={handleSubmitTest}
+                      onUntest={handleUntest}
                       busyCourseId={busyCourseId}
                     />
                   )}
