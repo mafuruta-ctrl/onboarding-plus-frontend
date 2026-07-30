@@ -17,12 +17,23 @@ function toSetKey(placementCode, itemId) {
   return placementCode + "|" + itemId;
 }
 
+// 管理者ページも同じセッション内で再訪問したときに毎回「読み込み中」を表示しなくて
+// 済むよう、直前の取得結果をモジュール変数に保持しておく（TOPページと同じ考え方）。
+let cachedAdminData = null;
+
+function defaultTabFor(d) {
+  if (!d) return null;
+  if (d.canEditTaskMaster) return "tasks";
+  if (d.canEditCourseMaster) return "courses";
+  return null;
+}
+
 export default function AdminPage() {
   const { idToken, isSignedIn } = useAuth();
 
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(cachedAdminData);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeTab, setActiveTab] = useState(() => defaultTabFor(cachedAdminData));
   const [materialsTaskId, setMaterialsTaskId] = useState(null);
   const [materialsCourseId, setMaterialsCourseId] = useState(null);
 
@@ -33,12 +44,8 @@ export default function AdminPage() {
       .getAdminMasterData(idToken)
       .then((d) => {
         setData(d);
-        setActiveTab((prev) => {
-          if (prev) return prev;
-          if (d.canEditTaskMaster) return "tasks";
-          if (d.canEditCourseMaster) return "courses";
-          return null;
-        });
+        cachedAdminData = d;
+        setActiveTab((prev) => prev || defaultTabFor(d));
       })
       .catch((err) => setError(err.message || String(err)));
   }, [isSignedIn, idToken]);
