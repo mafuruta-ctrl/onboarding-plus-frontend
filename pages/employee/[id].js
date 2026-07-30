@@ -45,13 +45,26 @@ export default function EmployeeDetailPage() {
     return <SignInScreen />;
   }
 
+  // 楽観的UI更新：GASからの応答（1〜数秒かかる）を待たずに、クリックした瞬間に
+  // 画面上の状態を先に切り替える。裏で実際の更新・再読み込みを行い、失敗した場合だけ
+  // 本来のサーバー状態に戻す。ボタンを押してから反映されるまでのタイムラグを解消するため。
   async function handleToggleTask(taskId, done) {
     setBusyTaskId(taskId);
+    setError(null);
+    const nowIso = new Date().toISOString();
+    setDetail((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        tasks: prev.tasks.map((t) => (t.taskId === taskId ? { ...t, done, completedAt: done ? nowIso : null } : t)),
+      };
+    });
     try {
       await gasApi.updateTaskStatus(idToken, id, taskId, done);
       await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
+      await loadDetail(); // 失敗時は実際のサーバー状態に戻す
     } finally {
       setBusyTaskId(null);
     }
@@ -59,11 +72,21 @@ export default function EmployeeDetailPage() {
 
   async function handleWatch(courseId) {
     setBusyCourseId(courseId);
+    setError(null);
+    const nowIso = new Date().toISOString();
+    setDetail((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        courses: prev.courses.map((c) => (c.courseId === courseId ? { ...c, watchedAt: nowIso, completed: true } : c)),
+      };
+    });
     try {
       await gasApi.updateTrainingProgress(idToken, id, courseId, "watch");
       await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
+      await loadDetail();
     } finally {
       setBusyCourseId(null);
     }
@@ -71,11 +94,24 @@ export default function EmployeeDetailPage() {
 
   async function handleSubmitTest(courseId, score) {
     setBusyCourseId(courseId);
+    setError(null);
+    setDetail((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        courses: prev.courses.map((c) => {
+          if (c.courseId !== courseId) return c;
+          const passed = score >= (c.passScore || 100);
+          return { ...c, testScore: score, testPassed: passed, completed: passed };
+        }),
+      };
+    });
     try {
       await gasApi.updateTrainingProgress(idToken, id, courseId, "test", score);
       await loadDetail();
     } catch (err) {
       setError(err.message || String(err));
+      await loadDetail();
     } finally {
       setBusyCourseId(null);
     }
