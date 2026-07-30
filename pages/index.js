@@ -9,6 +9,13 @@ import { gasApi } from "../lib/gasClient";
 
 const BADGE_CLASSES = ["badge-c0", "badge-c1", "badge-c2", "badge-c3", "badge-c4", "badge-c5"];
 
+// TOPページに戻ってくるたびに毎回「読み込み中」を表示すると体感速度が悪いため、
+// 直前に取得した一覧をモジュール変数に保持しておく（ページ遷移をまたいで残る簡易
+// キャッシュ。タブを閉じる／再読み込みすると消える）。表示は即座にこのキャッシュから
+// 行い、裏では毎回必ず最新データを取得して画面を更新するので、古いデータのまま
+// 固定されてしまうことはない。
+let cachedEmployees = null;
+
 function badgeClassFor(placementCode) {
   const str = String(placementCode || "");
   let hash = 0;
@@ -27,7 +34,7 @@ function statusTag(overallProgress) {
 export default function TopPage() {
   const router = useRouter();
   const { idToken, isSignedIn } = useAuth();
-  const [employees, setEmployees] = useState(null);
+  const [employees, setEmployees] = useState(cachedEmployees);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
 
@@ -38,7 +45,10 @@ export default function TopPage() {
     gasApi
       .getEmployeeList(idToken)
       .then((data) => {
-        if (!cancelled) setEmployees(data);
+        if (!cancelled) {
+          setEmployees(data);
+          cachedEmployees = data;
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(err.message || String(err));
