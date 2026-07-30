@@ -10,6 +10,12 @@ import ReportTab from "../../components/ReportTab";
 import { useAuth } from "../../components/AuthProvider";
 import { gasApi } from "../../lib/gasClient";
 
+// 個人ページ間を行き来したときに毎回「読み込み中」を表示しなくて済むよう、社員IDごとに
+// 直前の取得結果をモジュール変数に保持しておく（TOP/管理者ページと同じ考え方）。
+// このページは動的ルート（同じコンポーネントのままIDだけ差し替わる）なので、
+// useStateの初期値ではなくidの変化を見るuseEffect側でキャッシュを反映する。
+const detailCache = {};
+
 // 日報タブは日報アプリ連携の対象である sales_member（営業・MGR未満）配属のみ表示する。
 const ALL_TABS = [
   { key: "settings", icon: Settings, label: "各種設定" },
@@ -28,12 +34,24 @@ export default function EmployeeDetailPage() {
   const [busyTaskId, setBusyTaskId] = useState(null);
   const [busyCourseId, setBusyCourseId] = useState(null);
 
+  // idが切り替わった瞬間（別の社員のページへ遷移した瞬間）に、まずキャッシュ済みの
+  // データ（無ければnull）へ即座に切り替える。これが無いと、このページは動的ルートで
+  // コンポーネントが再マウントされない（=stateがリセットされない）ため、実際のデータが
+  // 届くまで直前に見ていた「別の社員」のデータが表示され続けてしまう。
+  useEffect(() => {
+    if (!id) return;
+    setDetail(detailCache[id] || null);
+  }, [id]);
+
   const loadDetail = useCallback(() => {
     if (!isSignedIn || !id) return;
     setError(null);
     return gasApi
       .getEmployeeDetail(idToken, id)
-      .then((data) => setDetail(data))
+      .then((data) => {
+        setDetail(data);
+        detailCache[id] = data;
+      })
       .catch((err) => setError(err.message || String(err)));
   }, [isSignedIn, idToken, id]);
 
