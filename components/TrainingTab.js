@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Calendar, Check, ClipboardCheck, Copy, ExternalLink, FileText } from "lucide-react";
+import { BookOpen, Calendar, Check, ClipboardCheck, Copy, ExternalLink, FileText, RotateCcw } from "lucide-react";
 import MaterialsModal from "./MaterialsModal";
 
 /**
@@ -60,7 +60,7 @@ function CourseLinkOrPath({ url }) {
   );
 }
 
-export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, busyCourseId }) {
+export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSubmitTest, onUntest, busyCourseId }) {
   const [materialsFor, setMaterialsFor] = useState(null);
 
   if (!courses || courses.length === 0) {
@@ -97,7 +97,6 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
                         {course.deadline && isCalendarDeadline(course.deadline) && (
-                          <a
                           
                             className="course-meta course-meta-link"
                             href={GOOGLE_CALENDAR_URL}
@@ -151,13 +150,25 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                       )}
 
                       {!course.hasTest && (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={!canEdit || busy || !!course.watchedAt}
-                          onClick={() => onWatch(course.courseId)}
-                        >
-                          {course.watchedAt ? "視聴済み" : "完了"}
-                        </button>
+                        course.watchedAt ? (
+                          // 誤って「完了」を押してしまった場合に取り消せるようにする
+                          // （視聴済みのまま固定されず、押し間違いをやり直せる）。
+                          <button
+                            className="btn btn-outline btn-sm"
+                            disabled={!canEdit || busy}
+                            onClick={() => onUnwatch(course.courseId)}
+                          >
+                            <RotateCcw size={13} /> 完了を取り消す
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={!canEdit || busy}
+                            onClick={() => onWatch(course.courseId)}
+                          >
+                            完了
+                          </button>
+                        )
                       )}
 
                       {course.hasTest && (
@@ -167,13 +178,24 @@ export default function TrainingTab({ courses, canEdit, onWatch, onSubmitTest, b
                               <ClipboardCheck size={13} /> テストを受ける
                             </a>
                           )}
-                          <button
-                            className="btn btn-primary btn-sm"
-                            disabled={!canEdit || busy || course.testPassed === true}
-                            onClick={() => onSubmitTest(course.courseId, passScore)}
-                          >
-                            {course.testPassed === true ? "テスト完了済み" : `テスト完了（${passScore}点）`}
-                          </button>
+                          {course.testPassed === true ? (
+                            // 誤って「テスト完了」を押してしまった場合に取り消せるようにする。
+                            <button
+                              className="btn btn-outline btn-sm"
+                              disabled={!canEdit || busy}
+                              onClick={() => onUntest(course.courseId)}
+                            >
+                              <RotateCcw size={13} /> 完了を取り消す
+                            </button>
+                          ) : (
+                            <button
+                              className="btn btn-primary btn-sm"
+                              disabled={!canEdit || busy}
+                              onClick={() => onSubmitTest(course.courseId, passScore)}
+                            >
+                              {`テスト完了（${passScore}点）`}
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
