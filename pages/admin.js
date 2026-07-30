@@ -86,14 +86,45 @@ export default function AdminPage() {
   const materialsTask = materialsTaskId ? data.tasks.find((t) => t.taskId === materialsTaskId) : null;
   const materialsCourse = materialsCourseId ? data.courses.find((c) => c.courseId === materialsCourseId) : null;
 
+  // 楽観的UI更新：チェックのON/OFF操作は、サーバー応答を待たずに即座にチェック状態を
+  // 切り替える。裏で実際の更新を行い、失敗した場合は再読み込みして本来の状態に戻す
+  // （エラー自体はAdminMatrixTable側の既存のエラー表示に任せるため再throwする）。
   async function handleToggleTask(placementCode, taskId, included) {
-    await gasApi.updatePlacementTaskSet(idToken, placementCode, taskId, included);
-    await load();
+    setData((prev) => {
+      if (!prev) return prev;
+      const key = toSetKey(placementCode, taskId);
+      const exists = prev.placementTaskSet.some((r) => toSetKey(r.placementCode, r.taskId) === key);
+      const nextSet = included
+        ? (exists ? prev.placementTaskSet : [...prev.placementTaskSet, { placementCode, taskId, order: prev.placementTaskSet.length + 1 }])
+        : prev.placementTaskSet.filter((r) => toSetKey(r.placementCode, r.taskId) !== key);
+      return { ...prev, placementTaskSet: nextSet };
+    });
+    try {
+      await gasApi.updatePlacementTaskSet(idToken, placementCode, taskId, included);
+      await load();
+    } catch (err) {
+      await load();
+      throw err;
+    }
   }
 
   async function handleToggleCourse(placementCode, courseId, included) {
-    await gasApi.updatePlacementCourseSet(idToken, placementCode, courseId, included);
-    await load();
+    setData((prev) => {
+      if (!prev) return prev;
+      const key = toSetKey(placementCode, courseId);
+      const exists = prev.placementCourseSet.some((r) => toSetKey(r.placementCode, r.courseId) === key);
+      const nextSet = included
+        ? (exists ? prev.placementCourseSet : [...prev.placementCourseSet, { placementCode, courseId, order: prev.placementCourseSet.length + 1 }])
+        : prev.placementCourseSet.filter((r) => toSetKey(r.placementCode, r.courseId) !== key);
+      return { ...prev, placementCourseSet: nextSet };
+    });
+    try {
+      await gasApi.updatePlacementCourseSet(idToken, placementCode, courseId, included);
+      await load();
+    } catch (err) {
+      await load();
+      throw err;
+    }
   }
 
   async function handleAddMaterial(taskId, name, url) {
