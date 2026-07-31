@@ -97,7 +97,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
                         {course.deadline && isCalendarDeadline(course.deadline) && (
-                          <a
+                          
                             className="course-meta course-meta-link"
                             href={GOOGLE_CALENDAR_URL}
                             target="_blank"
@@ -154,19 +154,25 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                           // 誤って「完了」を押してしまった場合に取り消せるようにする
                           // （視聴済みのまま固定されず、押し間違いをやり直せる）。
                           <button
-                            className="btn btn-outline btn-sm"
+                            className={`btn btn-outline btn-sm ${busy ? "is-busy" : ""}`}
                             disabled={!canEdit || busy}
                             onClick={() => onUnwatch(course.courseId)}
                           >
-                            <RotateCcw size={13} /> 完了を取り消す
+                            {busy ? (
+                              <span className="btn-busy-dot" />
+                            ) : (
+                              <>
+                                <RotateCcw size={13} /> 完了を取り消す
+                              </>
+                            )}
                           </button>
                         ) : (
                           <button
-                            className="btn btn-primary btn-sm"
+                            className={`btn btn-primary btn-sm ${busy ? "is-busy" : ""}`}
                             disabled={!canEdit || busy}
                             onClick={() => onWatch(course.courseId)}
                           >
-                            完了
+                            {busy ? <span className="btn-busy-dot" /> : "完了"}
                           </button>
                         )
                       )}
@@ -181,19 +187,25 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                           {course.testPassed === true ? (
                             // 誤って「テスト完了」を押してしまった場合に取り消せるようにする。
                             <button
-                              className="btn btn-outline btn-sm"
+                              className={`btn btn-outline btn-sm ${busy ? "is-busy" : ""}`}
                               disabled={!canEdit || busy}
                               onClick={() => onUntest(course.courseId)}
                             >
-                              <RotateCcw size={13} /> 完了を取り消す
+                              {busy ? (
+                                <span className="btn-busy-dot" />
+                              ) : (
+                                <>
+                                  <RotateCcw size={13} /> 完了を取り消す
+                                </>
+                              )}
                             </button>
                           ) : (
                             <button
-                              className="btn btn-primary btn-sm"
+                              className={`btn btn-primary btn-sm ${busy ? "is-busy" : ""}`}
                               disabled={!canEdit || busy}
                               onClick={() => onSubmitTest(course.courseId, passScore)}
                             >
-                              {`テスト完了（${passScore}点）`}
+                              {busy ? <span className="btn-busy-dot" /> : `テスト完了（${passScore}点）`}
                             </button>
                           )}
                         </div>
