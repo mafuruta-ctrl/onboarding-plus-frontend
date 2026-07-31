@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import Layout from "../components/Layout";
 import SignInScreen from "../components/SignInScreen";
 import ProgressBar from "../components/ProgressBar";
+import LoadingDots from "../components/LoadingDots";
 import { useAuth } from "../components/AuthProvider";
 import { gasApi } from "../lib/gasClient";
 
@@ -95,7 +96,7 @@ export default function TopPage() {
         </div>
       )}
 
-      {!error && employees === null && <p className="loading-state">読み込み中…</p>}
+      {!error && employees === null && <LoadingDots />}
 
       {!error && employees !== null && (
         <>
