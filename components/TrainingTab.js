@@ -19,6 +19,14 @@ function isCalendarDeadline(value) {
   return (value || "").includes("カレンダー");
 }
 
+function CalendarDeadlineLink({ deadline }) {
+  return (
+    <a className="course-meta course-meta-link" href={GOOGLE_CALENDAR_URL} target="_blank" rel="noreferrer">
+      <Calendar size={11} /> 対応期日：{deadline}
+    </a>
+  );
+}
+
 function CourseLinkOrPath({ url }) {
   const [copied, setCopied] = useState(false);
 
@@ -97,14 +105,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
                         {course.deadline && isCalendarDeadline(course.deadline) && (
-                          
-                            className="course-meta course-meta-link"
-                            href={GOOGLE_CALENDAR_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Calendar size={11} /> 対応期日：{course.deadline}
-                          </a>
+                          <CalendarDeadlineLink deadline={course.deadline} />
                         )}
                         {course.deadline && !isCalendarDeadline(course.deadline) && (
                           <div className="course-meta">対応期日：{course.deadline}</div>
