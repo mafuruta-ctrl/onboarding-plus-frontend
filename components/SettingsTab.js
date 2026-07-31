@@ -21,7 +21,7 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
         const categoryTasks = tasks.filter((t) => (t.category || "その他") === category);
         const doneN = categoryTasks.filter((t) => t.done).length;
         return (
-          <div key={category}>
+          <div key={category} className="category-block">
             <div className="section-title">
               {category}
               <span className="cat-progress">
