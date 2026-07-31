@@ -627,6 +627,17 @@ tr.row-clickable:hover {
   /* tab content sits directly on the page background, matching the prototype */
 }
 
+/* カテゴリ（各種設定・研修）ごとのブロック。カテゴリ単位のまとまりを
+   視覚的に区切って見やすくするためのカード状の枠。 */
+.category-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
 .section-title {
   font-size: 14.5px;
   font-weight: 700;
@@ -638,6 +649,15 @@ tr.row-clickable:hover {
 
 .section-title:first-child {
   margin-top: 0;
+}
+
+.category-block .task-list,
+.category-block .course-grid {
+  margin-bottom: 0;
+}
+
+.category-block .task-row:last-child {
+  margin-bottom: 0;
 }
 
 .cat-progress {
@@ -1232,6 +1252,69 @@ tr.row-clickable:hover {
   color: var(--muted);
   font-size: 14px;
   padding: 20px 0;
+}
+
+/* 読み込み中インジケーター（3点の点滅アニメーション） */
+.loading-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 20px 0;
+}
+
+.loading-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: loading-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loading-dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 最上部に戻るボタン */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+  transition: background 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+}
+
+.back-to-top-btn:hover {
+  background: var(--primary-dark);
+  transform: translateX(-50%) translateY(-3px);
 }
 
 .empty-state {
