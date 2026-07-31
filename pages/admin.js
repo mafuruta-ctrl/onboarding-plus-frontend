@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Wrench } from "lucide-react";
 import Layout from "../components/Layout";
 import SignInScreen from "../components/SignInScreen";
+import LoadingDots from "../components/LoadingDots";
 import AdminMatrixTable from "../components/AdminMatrixTable";
 import AdminMaterialsModal from "../components/AdminMaterialsModal";
 import AdminCourseMaterialsModal from "../components/AdminCourseMaterialsModal";
@@ -84,7 +85,7 @@ export default function AdminPage() {
   if (!data) {
     return (
       <Layout title="管理者ページ">
-        <p className="loading-state">読み込み中…</p>
+        <LoadingDots />
       </Layout>
     );
   }
