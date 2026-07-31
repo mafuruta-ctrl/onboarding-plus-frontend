@@ -30,17 +30,22 @@ export default function SettingsTab({ tasks, canEdit, onToggleTask, busyTaskId }
             </div>
             <ul className="task-list">
               {categoryTasks.map((task) => {
-                const busy = !canEdit || busyTaskId === task.taskId;
+                const isProcessing = busyTaskId === task.taskId;
+                const busy = !canEdit || isProcessing;
                 return (
                   <li key={task.taskId} className={`task-row ${task.done ? "is-done" : ""}`}>
                     <button
                       type="button"
-                      className={`chk ${task.done ? "is-checked" : ""}`}
+                      className={`chk ${task.done ? "is-checked" : ""} ${isProcessing ? "is-busy" : ""}`}
                       disabled={busy}
                       onClick={() => onToggleTask(task.taskId, !task.done)}
                       aria-label={task.done ? "未完了に戻す" : "完了にする"}
                     >
-                      {task.done && <Check size={13} strokeWidth={3} />}
+                      {isProcessing ? (
+                        <span className="busy-dot" />
+                      ) : (
+                        task.done && <Check size={13} strokeWidth={3} />
+                      )}
                     </button>
                     <div style={{ flex: 1 }}>
                       <div className="task-name">{task.name}</div>
