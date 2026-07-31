@@ -75,7 +75,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
         const categoryCourses = courses.filter((c) => (c.category || "その他") === category);
         const doneN = categoryCourses.filter((c) => c.completed).length;
         return (
-          <div key={category}>
+          <div key={category} className="category-block">
             <div className="section-title">
               {category}
               <span className="cat-progress">
@@ -97,7 +97,7 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                           {course.hasTest ? "・確認テストあり" : ""}
                         </div>
                         {course.deadline && isCalendarDeadline(course.deadline) && (
-                          <a
+                          
                             className="course-meta course-meta-link"
                             href={GOOGLE_CALENDAR_URL}
                             target="_blank"
