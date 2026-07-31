@@ -1,11 +1,35 @@
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { LayoutDashboard, Settings2 } from "lucide-react";
+import { ArrowUp, LayoutDashboard, Settings2 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 export default function Layout({ children, title, crumb }) {
   const { profile, signOut } = useAuth();
   const router = useRouter();
+
+  // ページを半分程度スクロールしたら、中央下部に「最上部に戻る」ボタンを表示する。
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollableHeight <= 0) {
+        setShowBackToTop(false);
+        return;
+      }
+      setShowBackToTop(window.scrollY > scrollableHeight / 2);
+    }
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // ページ遷移すると内容の高さやスクロール位置が変わるため、遷移完了時にも
+    // 判定し直す（Layout自体は遷移をまたいでマウントされたままになるため）。
+    router.events.on("routeChangeComplete", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      router.events.off("routeChangeComplete", handleScroll);
+    };
+  }, [router.events]);
 
   return (
     <div className="app-shell">
@@ -54,6 +78,17 @@ export default function Layout({ children, title, crumb }) {
         )}
         <main className="content">{children}</main>
       </div>
+
+      {showBackToTop && (
+        <button
+          type="button"
+          className="back-to-top-btn"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="最上部に戻る"
+        >
+          <ArrowUp size={19} />
+        </button>
+      )}
     </div>
   );
 }
