@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { ArrowLeft, Building2, Calendar, GraduationCap, NotebookText, Settings } from "lucide-react";
 import Layout from "../../components/Layout";
 import SignInScreen from "../../components/SignInScreen";
+import LoadingDots from "../../components/LoadingDots";
 import ProgressRing from "../../components/ProgressRing";
 import SettingsTab from "../../components/SettingsTab";
 import TrainingTab from "../../components/TrainingTab";
@@ -209,7 +210,7 @@ export default function EmployeeDetailPage() {
 
       {error && <div className="error-banner">エラーが発生しました：{error}</div>}
 
-      {!detail && !error && <p className="loading-state">読み込み中…</p>}
+      {!detail && !error && <LoadingDots />}
 
       {detail && (
         <>
