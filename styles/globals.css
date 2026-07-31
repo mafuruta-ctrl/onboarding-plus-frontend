@@ -732,6 +732,22 @@ tr.row-clickable:hover {
   opacity: 0.55;
 }
 
+/* 処理待ちの間は「禁止マーク」ではなく、小さい点滅ドットを表示する
+   （.is-busyは.chk:disabledより後に置いて上書きする）。 */
+.chk.is-busy {
+  cursor: wait;
+  opacity: 1;
+}
+
+.busy-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: loading-dot-pulse 1s ease-in-out infinite;
+}
+
 .task-name {
   font-weight: 600;
   font-size: 13.5px;
@@ -998,6 +1014,22 @@ tr.row-clickable:hover {
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* 処理待ちの間は「禁止マーク」ではなく、小さい点滅ドットを表示する
+   （.is-busyは.btn:disabledより後に置いて上書きする）。 */
+.btn.is-busy {
+  cursor: wait;
+  opacity: 1;
+}
+
+.btn-busy-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: loading-dot-pulse 1s ease-in-out infinite;
 }
 
 .btn-primary {
