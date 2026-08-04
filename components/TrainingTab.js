@@ -28,6 +28,18 @@ function CalendarDeadlineLink({ deadline }) {
   );
 }
 
+// course-gridの深いネスト位置に直接<a>タグを書くと、GitHubのWeb上エディタへの貼り付け時に
+// タグが欠落する現象が過去に繰り返し発生した（CalendarDeadlineLinkと同じ理由での対策）。
+// そのため、ここも同じくファイル冒頭側の浅いインデント位置にコンポーネントとして
+// 切り出し、使用箇所では1行の呼び出しだけにしている。
+function SubmissionLink({ submission }) {
+  return (
+    <a className="course-meta course-meta-link" href={submission.url} target="_blank" rel="noreferrer">
+      <Check size={11} strokeWidth={3} /> 提出済み：{submission.fileName}
+    </a>
+  );
+}
+
 function CourseLinkOrPath({ url }) {
   const [copied, setCopied] = useState(false);
 
@@ -148,14 +160,7 @@ export default function TrainingTab({
                     </div>
 
                     {course.submitFolderUrl && course.submission && (
-                      
-                        className="course-meta course-meta-link"
-                        href={course.submission.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <Check size={11} strokeWidth={3} /> 提出済み：{course.submission.fileName}
-                      </a>
+                      <SubmissionLink submission={course.submission} />
                     )}
 
                     <CourseLinkOrPath url={course.videoUrl} />
