@@ -1408,3 +1408,61 @@ tr.row-clickable:hover {
     padding: 20px 16px 40px;
   }
 }
+/* ---------------------------------------------------------------------- */
+/* 資料提出モーダル：ドロップゾーン                                        */
+/* ---------------------------------------------------------------------- */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone svg {
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.dropzone p {
+  margin: 2px 0;
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.dropzone.has-file {
+  border-style: solid;
+  border-color: var(--primary);
+}
+
+.dropzone-filename {
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.dropzone-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.form-error {
+  color: #b91c1c;
+  font-size: 12.5px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
