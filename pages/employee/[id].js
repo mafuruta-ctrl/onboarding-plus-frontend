@@ -191,6 +191,24 @@ export default function EmployeeDetailPage() {
     }
   }
 
+  // 資料提出：JSONP（GET）では大きなファイルを送れないため、gasApi.submitCourseMaterial
+  // は隠しiframe宛のフォームPOSTを使う。レスポンス本文を読めない都合上、視聴・テストの
+  // 完了操作のような楽観的UI更新はできない（サーバーが実際に発行するDriveファイルURLを
+  // 事前に知る術がないため）ので、送信完了後にloadDetailで実際の状態を取得して確認する。
+  async function handleSubmitMaterial(courseId, file) {
+    setBusyCourseId(courseId);
+    setError(null);
+    try {
+      await gasApi.submitCourseMaterial(idToken, id, courseId, file);
+      await loadDetail();
+    } catch (err) {
+      setError(err.message || String(err));
+      throw err; // モーダル側にもエラーを伝え、モーダルを閉じずにメッセージを表示させる
+    } finally {
+      setBusyCourseId(null);
+    }
+  }
+
   // カテゴリ名に「任意」を含むタスク（備品（任意）・システム・ツール（任意）など）は
   // 必須設定ではないため、このバッジの%計算からは除外する（GAS側のcomputeProgress_と
   // 同じルール）。タスク自体は各種設定タブに引き続き表示・チェック可能。
@@ -276,6 +294,7 @@ export default function EmployeeDetailPage() {
                       onUnwatch={handleUnwatch}
                       onSubmitTest={handleSubmitTest}
                       onUntest={handleUntest}
+                      onSubmitMaterial={handleSubmitMaterial}
                       busyCourseId={busyCourseId}
                     />
                   )}
