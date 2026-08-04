@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { BookOpen, Calendar, Check, ClipboardCheck, Copy, ExternalLink, FileText, RotateCcw } from "lucide-react";
+import { BookOpen, Calendar, Check, ClipboardCheck, Copy, ExternalLink, FileText, FileUp, RotateCcw } from "lucide-react";
 import MaterialsModal from "./MaterialsModal";
+import SubmitMaterialModal from "./SubmitMaterialModal";
 
 /**
  * 動画URL欄には2種類の値が入り得る：
@@ -68,8 +69,18 @@ function CourseLinkOrPath({ url }) {
   );
 }
 
-export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSubmitTest, onUntest, busyCourseId }) {
+export default function TrainingTab({
+  courses,
+  canEdit,
+  onWatch,
+  onUnwatch,
+  onSubmitTest,
+  onUntest,
+  onSubmitMaterial,
+  busyCourseId,
+}) {
   const [materialsFor, setMaterialsFor] = useState(null);
+  const [submitMaterialFor, setSubmitMaterialFor] = useState(null);
 
   if (!courses || courses.length === 0) {
     return <p className="empty-state">この配属に割り当てられた研修コースはありません。</p>;
@@ -136,6 +147,17 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                         ))}
                     </div>
 
+                    {course.submitFolderUrl && course.submission && (
+                      
+                        className="course-meta course-meta-link"
+                        href={course.submission.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Check size={11} strokeWidth={3} /> 提出済み：{course.submission.fileName}
+                      </a>
+                    )}
+
                     <CourseLinkOrPath url={course.videoUrl} />
 
                     <div className="course-actions">
@@ -148,6 +170,22 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
                         <a className="btn btn-outline btn-sm" href={course.glossaryUrl} target="_blank" rel="noreferrer">
                           <BookOpen size={13} /> 用語集
                         </a>
+                      )}
+
+                      {course.submitFolderUrl && (
+                        <button
+                          className={`btn ${course.submission ? "btn-outline" : "btn-primary"} btn-sm ${busy ? "is-busy" : ""}`}
+                          disabled={!canEdit || busy}
+                          onClick={() => setSubmitMaterialFor(course)}
+                        >
+                          {busy ? (
+                            <span className="btn-busy-dot" />
+                          ) : (
+                            <>
+                              <FileUp size={13} /> {course.submission ? "再提出する" : "資料を提出する"}
+                            </>
+                          )}
+                        </button>
                       )}
 
                       {!course.hasTest && (
@@ -229,6 +267,14 @@ export default function TrainingTab({ courses, canEdit, onWatch, onUnwatch, onSu
           taskName={materialsFor.name}
           materials={materialsFor.materials}
           onClose={() => setMaterialsFor(null)}
+        />
+      )}
+
+      {submitMaterialFor && (
+        <SubmitMaterialModal
+          courseName={submitMaterialFor.name}
+          onClose={() => setSubmitMaterialFor(null)}
+          onSubmit={(file) => onSubmitMaterial(submitMaterialFor.courseId, file)}
         />
       )}
     </>
