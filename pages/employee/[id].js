@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { ArrowLeft, Building2, Calendar, GraduationCap, NotebookText, Settings } from "lucide-react";
+import { ArrowLeft, Building2, Calendar, GraduationCap, NotebookText, Settings, Users } from "lucide-react";
 import Layout from "../../components/Layout";
 import SignInScreen from "../../components/SignInScreen";
 import LoadingDots from "../../components/LoadingDots";
@@ -8,6 +8,7 @@ import ProgressRing from "../../components/ProgressRing";
 import SettingsTab from "../../components/SettingsTab";
 import TrainingTab from "../../components/TrainingTab";
 import ReportTab from "../../components/ReportTab";
+import MentorInterviewTab from "../../components/MentorInterviewTab";
 import { useAuth } from "../../components/AuthProvider";
 import { gasApi } from "../../lib/gasClient";
 
@@ -18,10 +19,14 @@ import { gasApi } from "../../lib/gasClient";
 const detailCache = {};
 
 // 日報タブは日報アプリ連携の対象である sales_member（営業・MGR未満）配属のみ表示する。
+// メンター面談タブは配属ではなく「そのメンター本人 or 人事部か」（サーバー側が
+// 判定して返すdetail.canViewMentorInterview）で表示可否が決まるため、requiresFlagで
+// 判定する（新入社員本人には見せない設計）。
 const ALL_TABS = [
   { key: "settings", icon: Settings, label: "各種設定" },
   { key: "training", icon: GraduationCap, label: "研修" },
   { key: "report", icon: NotebookText, label: "日報", placementOnly: "sales_member" },
+  { key: "mentor", icon: Users, label: "メンター面談", requiresFlag: "canViewMentorInterview" },
 ];
 
 export default function EmployeeDetailPage() {
@@ -73,6 +78,17 @@ export default function EmployeeDetailPage() {
   useEffect(() => {
     loadDetail();
   }, [loadDetail]);
+
+  // Slack通知の「ご確認ください」リンクは ?tab=mentor 付きでこのページへ深リンクする
+  // ため、router.queryが用意でき次第、それを初期表示タブとして反映する（対象タブが
+  // まだ表示条件を満たしていない場合は、下のvisibleTabsフィルタ側で自動的に無視される）。
+  useEffect(() => {
+    if (!router.isReady) return;
+    const requestedTab = router.query.tab;
+    if (typeof requestedTab === "string" && ALL_TABS.some((t) => t.key === requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, [router.isReady, router.query.tab]);
 
   if (!isSignedIn) {
     return <SignInScreen />;
@@ -252,7 +268,9 @@ export default function EmployeeDetailPage() {
 
           {(() => {
             const visibleTabs = ALL_TABS.filter(
-              (tab) => !tab.placementOnly || detail.placementCode === tab.placementOnly
+              (tab) =>
+                (!tab.placementOnly || detail.placementCode === tab.placementOnly) &&
+                (!tab.requiresFlag || detail[tab.requiresFlag])
             );
             const effectiveTab = visibleTabs.some((t) => t.key === activeTab)
               ? activeTab
@@ -299,6 +317,9 @@ export default function EmployeeDetailPage() {
                     />
                   )}
                   {effectiveTab === "report" && <ReportTab report={detail.report} />}
+                  {effectiveTab === "mentor" && (
+                    <MentorInterviewTab targetId={id} idToken={idToken} gasApi={gasApi} />
+                  )}
                 </div>
               </>
             );
