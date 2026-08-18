@@ -14,6 +14,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
   const [conductedAt, setConductedAt] = useState("");
   const [content, setContent] = useState("");
   const [impression, setImpression] = useState("");
+  const [hrQuestion, setHrQuestion] = useState("");
   const [formattingField, setFormattingField] = useState(null); // "content" | "impression" | null
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -39,7 +40,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit({ conductedAt, content, impression });
+      await onSubmit({ conductedAt, content, impression, hrQuestion });
       onClose();
     } catch (err) {
       setError(err.message || String(err));
@@ -119,6 +120,18 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
             value={impression}
             onChange={(e) => setImpression(e.target.value)}
             disabled={submitting}
+            placeholder="体調、コンディション、業務状況などの共有。その他お気づきの点があれば自由に記載してください。"
+          />
+        </div>
+
+        <div className="interview-field">
+          <label>人事への質問・相談（任意）</label>
+          <textarea
+            rows={3}
+            value={hrQuestion}
+            onChange={(e) => setHrQuestion(e.target.value)}
+            disabled={submitting}
+            placeholder="人事に確認・相談したいことがあれば記載してください。"
           />
         </div>
 
@@ -173,6 +186,12 @@ function InterviewHistoryModal({ rounds, onClose }) {
                 <>
                   <div className="interview-history-label">メンターの所感</div>
                   <p className="interview-history-text">{r.impression}</p>
+                </>
+              )}
+              {r.hrQuestion && (
+                <>
+                  <div className="interview-history-label">人事への質問・相談</div>
+                  <p className="interview-history-text">{r.hrQuestion}</p>
                 </>
               )}
             </div>
@@ -315,8 +334,15 @@ export default function MentorInterviewTab({ targetId, idToken, gasApi }) {
           nextRound={data.nextRound}
           onClose={() => setShowForm(false)}
           onFormatText={(text) => gasApi.formatMentorInterviewText(idToken, targetId, text)}
-          onSubmit={async ({ conductedAt, content, impression }) => {
-            const result = await gasApi.submitMentorInterview(idToken, targetId, conductedAt, content, impression);
+          onSubmit={async ({ conductedAt, content, impression, hrQuestion }) => {
+            const result = await gasApi.submitMentorInterview(
+              idToken,
+              targetId,
+              conductedAt,
+              content,
+              impression,
+              hrQuestion
+            );
             await load();
             if (result && result.reportGenerated === false) {
               setNotice(
