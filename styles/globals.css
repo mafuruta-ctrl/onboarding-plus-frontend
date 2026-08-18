@@ -1287,11 +1287,18 @@ tr.row-clickable:hover {
 }
 
 /* 読み込み中インジケーター（3点の点滅アニメーション） */
+.loading-dots-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px 0;
+}
+
 .loading-dots {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 20px 0;
 }
 
 .loading-dots span {
