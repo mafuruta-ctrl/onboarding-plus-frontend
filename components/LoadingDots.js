@@ -4,10 +4,12 @@
  */
 export default function LoadingDots() {
   return (
-    <div className="loading-dots" role="status" aria-label="読み込み中">
-      <span></span>
-      <span></span>
-      <span></span>
+    <div className="loading-dots-wrap">
+      <div className="loading-dots" role="status" aria-label="読み込み中">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </div>
   );
 }
