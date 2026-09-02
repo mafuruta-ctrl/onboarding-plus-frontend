@@ -1624,10 +1624,10 @@ tr.row-clickable:hover {
    .mentor-modal が付いているときだけ効くルールとして追加している。              */
 /* ---------------------------------------------------------------------- */
 .mentor-modal {
-  width: 640px;
-  max-width: 94vw;
-  max-height: 88vh;
-  padding: 26px 30px;
+  width: 820px;
+  max-width: 96vw;
+  max-height: 92vh;
+  padding: 26px 34px;
 }
 
 .mentor-modal .modal-title {
