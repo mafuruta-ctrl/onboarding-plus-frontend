@@ -213,6 +213,64 @@ function InterviewHistoryModal({ rounds, onClose }) {
   );
 }
 
+// 分析レポート本文（Geminiが【見出し】と・箇条書きだけで生成したプレーンテキスト）を
+// 見出し／箇条書き／段落のブロックに分けて、それぞれ余白をつけて表示する。
+// レポート本文そのもの（生成プロンプト側）には手を入れず、表示側だけで整形する。
+function parseReportBlocks(body) {
+  const lines = (body || "").split("\n");
+  const blocks = [];
+  lines.forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line) return;
+    if (/^【.+】$/.test(line)) {
+      blocks.push({ type: "heading", text: line });
+      return;
+    }
+    if (line.startsWith("・")) {
+      const last = blocks[blocks.length - 1];
+      if (last && last.type === "bullets") {
+        last.items.push(line.replace(/^・/, ""));
+      } else {
+        blocks.push({ type: "bullets", items: [line.replace(/^・/, "")] });
+      }
+      return;
+    }
+    blocks.push({ type: "paragraph", text: line });
+  });
+  return blocks;
+}
+
+function ReportBody({ body }) {
+  const blocks = parseReportBlocks(body);
+  return (
+    <div className="interview-report-body">
+      {blocks.map((block, i) => {
+        if (block.type === "heading") {
+          return (
+            <h4 className="interview-report-heading" key={i}>
+              {block.text}
+            </h4>
+          );
+        }
+        if (block.type === "bullets") {
+          return (
+            <ul className="interview-report-bullets" key={i}>
+              {block.items.map((item, j) => (
+                <li key={j}>{item}</li>
+              ))}
+            </ul>
+          );
+        }
+        return (
+          <p className="interview-report-paragraph" key={i}>
+            {block.text}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 function InterviewReportModal({ report, onClose, onRegenerate }) {
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState(null);
@@ -244,7 +302,7 @@ function InterviewReportModal({ report, onClose, onRegenerate }) {
         {report ? (
           <>
             <p className="interview-history-date">作成日時：{report.generatedAt}</p>
-            <p className="interview-report-body">{report.body}</p>
+            <ReportBody body={report.body} />
           </>
         ) : (
           <p className="modal-empty">まだレポートは作成されていません（4回目の面談報告後に自動作成されます）。</p>
