@@ -22,25 +22,22 @@ const MENTOR_INTERVIEW_REQUIRED_NOTE = `【必須事項】
 function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
   const [conductedAt, setConductedAt] = useState("");
   const [content, setContent] = useState("");
-  const [impression, setImpression] = useState("");
   const [hrQuestion, setHrQuestion] = useState("");
-  const [formattingField, setFormattingField] = useState(null); // "content" | "impression" | null
+  const [formatting, setFormatting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  async function handleFormat(field) {
-    const currentText = field === "content" ? content : impression;
-    if (!currentText.trim() || formattingField) return;
-    setFormattingField(field);
+  async function handleFormat() {
+    if (!content.trim() || formatting) return;
+    setFormatting(true);
     setError(null);
     try {
-      const formatted = await onFormatText(currentText);
-      if (field === "content") setContent(formatted);
-      else setImpression(formatted);
+      const formatted = await onFormatText(content);
+      setContent(formatted);
     } catch (err) {
       setError(err.message || String(err));
     } finally {
-      setFormattingField(null);
+      setFormatting(false);
     }
   }
 
@@ -49,7 +46,9 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
     setSubmitting(true);
     setError(null);
     try {
-      await onSubmit({ conductedAt, content, impression, hrQuestion });
+      // メンターの所感は「面談した内容・所感」に統合したため、内容側にまとめて
+      // 送信する（送信先の項目自体は互換のため残っているので空文字を渡す）。
+      await onSubmit({ conductedAt, content, impression: "", hrQuestion });
       onClose();
     } catch (err) {
       setError(err.message || String(err));
@@ -83,14 +82,14 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
 
         <div className="interview-field interview-field--content">
           <div className="interview-field-head">
-            <label>面談した内容</label>
+            <label>面談した内容・所感</label>
             <button
               type="button"
-              className={`btn btn-outline btn-sm ${formattingField === "content" ? "is-busy" : ""}`}
-              onClick={() => handleFormat("content")}
-              disabled={submitting || !!formattingField || !content.trim()}
+              className={`btn btn-outline btn-sm ${formatting ? "is-busy" : ""}`}
+              onClick={handleFormat}
+              disabled={submitting || formatting || !content.trim()}
             >
-              {formattingField === "content" ? (
+              {formatting ? (
                 <span className="btn-busy-dot" />
               ) : (
                 <>
@@ -100,45 +99,18 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
             </button>
           </div>
           <textarea
-            rows={4}
+            rows={9}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             disabled={submitting}
-            placeholder="箇条書きのままでも構いません。「AI整形する」で文章に整えられます（内容は変わりません）。"
-          />
-        </div>
-
-        <div className="interview-field interview-field--impression">
-          <div className="interview-field-head">
-            <label>メンターの所感</label>
-            <button
-              type="button"
-              className={`btn btn-outline btn-sm ${formattingField === "impression" ? "is-busy" : ""}`}
-              onClick={() => handleFormat("impression")}
-              disabled={submitting || !!formattingField || !impression.trim()}
-            >
-              {formattingField === "impression" ? (
-                <span className="btn-busy-dot" />
-              ) : (
-                <>
-                  <Bot size={13} /> AI整形する
-                </>
-              )}
-            </button>
-          </div>
-          <textarea
-            rows={3}
-            value={impression}
-            onChange={(e) => setImpression(e.target.value)}
-            disabled={submitting}
-            placeholder="体調、コンディション、業務状況などの共有。その他お気づきの点があれば自由に記載してください。"
+            placeholder="箇条書きのままでも構いません。「AI整形する」で文章に整えられます（内容は変わりません）。体調、コンディション、業務状況などの共有や、その他お気づきの点があれば併せて記載してください。"
           />
         </div>
 
         <div className="interview-field interview-field--hr">
           <label>人事への質問・相談（任意）</label>
           <textarea
-            rows={3}
+            rows={4}
             value={hrQuestion}
             onChange={(e) => setHrQuestion(e.target.value)}
             disabled={submitting}
@@ -191,11 +163,13 @@ function InterviewHistoryModal({ rounds, onClose }) {
                 </span>
                 <span className="interview-history-date">実施日：{r.conductedAt}</span>
               </div>
-              <div className="interview-history-label">面談した内容</div>
+              <div className="interview-history-label">面談した内容・所感</div>
               <p className="interview-history-text">{r.content}</p>
+              {/* メンターの所感は「面談した内容・所感」に統合したが、統合前に別々に
+                  報告された過去のデータには残っているため、あれば引き続き表示する。 */}
               {r.impression && (
                 <>
-                  <div className="interview-history-label">メンターの所感</div>
+                  <div className="interview-history-label">メンターの所感（旧項目）</div>
                   <p className="interview-history-text">{r.impression}</p>
                 </>
               )}
