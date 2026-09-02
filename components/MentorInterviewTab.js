@@ -10,6 +10,15 @@ import LoadingDots from "./LoadingDots";
  * detail.canViewMentorInterview で判定してからこのコンポーネントを描画する。
  */
 
+// メンター面談報告フォームの案内文。回数によらず毎回同じ内容を表示する。
+const MENTOR_INTERVIEW_REQUIRED_NOTE = `【必須事項】
+・各部の業務内容を案内
+・チームの役割、ミッションを案内
+・個人の役割、ミッションを案内
+・会社、自部署、チーム、個人目標（予算など）の落とし込み
+・予算の落としこみに付随して、期待値を伝える（営業部のみ）
+・その他、社内やチーム内のルールなど`;
+
 function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
   const [conductedAt, setConductedAt] = useState("");
   const [content, setContent] = useState("");
@@ -50,7 +59,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
 
   return (
     <div className="modal-overlay" onClick={submitting ? undefined : onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box mentor-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <div className="modal-title">
             <Users size={16} /> メンター面談報告（{nextRound}回目）
@@ -60,7 +69,9 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
           </button>
         </div>
 
-        <div className="interview-field">
+        <div className="mentor-required-note">{MENTOR_INTERVIEW_REQUIRED_NOTE}</div>
+
+        <div className="interview-field interview-field--date">
           <label>面談実施日</label>
           <input
             type="date"
@@ -70,7 +81,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
           />
         </div>
 
-        <div className="interview-field">
+        <div className="interview-field interview-field--content">
           <div className="interview-field-head">
             <label>面談した内容</label>
             <button
@@ -97,7 +108,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
           />
         </div>
 
-        <div className="interview-field">
+        <div className="interview-field interview-field--impression">
           <div className="interview-field-head">
             <label>メンターの所感</label>
             <button
@@ -124,7 +135,7 @@ function InterviewReportForm({ nextRound, onClose, onSubmit, onFormatText }) {
           />
         </div>
 
-        <div className="interview-field">
+        <div className="interview-field interview-field--hr">
           <label>人事への質問・相談（任意）</label>
           <textarea
             rows={3}
@@ -159,7 +170,7 @@ function InterviewHistoryModal({ rounds, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box mentor-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <div className="modal-title">
             <FileText size={16} /> 面談記録
@@ -220,7 +231,7 @@ function InterviewReportModal({ report, onClose, onRegenerate }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box mentor-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <div className="modal-title">
             <MessageSquareText size={16} /> 分析レポート
