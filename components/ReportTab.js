@@ -1,7 +1,8 @@
 import { ExternalLink, NotebookText } from "lucide-react";
 
 export default function ReportTab({ report }) {
-  const reportUrl = process.env.NEXT_PUBLIC_DAILY_REPORT_URL || "#";
+  // 「日報連携情報」シートの日報URL（社員ごと）を優先して使う。
+  const reportUrl = (report && report.url) || process.env.NEXT_PUBLIC_DAILY_REPORT_URL || "";
   const rate = report && report.required
     ? Math.min(100, Math.round((Number(report.submitted || 0) / Number(report.required)) * 100))
     : null;
@@ -45,9 +46,15 @@ export default function ReportTab({ report }) {
             <p className="empty-state">日報の連携情報がまだ登録されていません。</p>
           )}
         </div>
-        <a className="btn btn-primary" href={reportUrl} target="_blank" rel="noreferrer">
-          <ExternalLink size={14} /> 日報アプリを開く
-        </a>
+        {reportUrl ? (
+          <a className="btn btn-primary" href={reportUrl} target="_blank" rel="noreferrer">
+            <ExternalLink size={14} /> 日報アプリを開く
+          </a>
+        ) : (
+          <button className="btn btn-primary" type="button" disabled title="日報URLが未登録です">
+            <ExternalLink size={14} /> 日報アプリを開く
+          </button>
+        )}
       </div>
       <p className="report-note">※ 日報タブの提出率は全体進捗率の算出には含めていません（参考表示）。</p>
     </>
